@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-3">AI Pipeline Builder</h2>
+
+<!-- Buttons -->
+<div class="mb-3">
+  <button class="btn btn-sm btn-primary" onclick="addNode('input')">Add Input</button>
+  <button class="btn btn-sm btn-warning" onclick="addNode('preprocessor')">Add Preprocessor</button>
+  <button class="btn btn-sm btn-info" onclick="addNode('model')">Add Model</button>
+  <button class="btn btn-sm btn-success" onclick="addNode('output')">Add Output</button>
+  <button class="btn btn-danger btn-sm" onclick="cy.elements().remove()">Clear</button>
+  <button class="btn btn-success btn-sm" onclick="saveGraph()">Save Graph</button>
+</div>
+
+<!-- Cytoscape Container -->
+<div id="cy" style="width: 100%; height: 600px; border: 1px solid #ccc;"></div>
+
+<script src="https://unpkg.com/cytoscape@3.25.0/dist/cytoscape.min.js"></script>
+
+<script>
+let idCounter = 0;
+const colors = {
+  input: '#007bff',
+  preprocessor: '#ffc107',
+  model: '#17a2b8',
+  output: '#28a745'
+};
+
+const cy = cytoscape({
+  container: document.getElementById('cy'),
+  layout: { name: 'grid' },
+  style: [
+    {
+      selector: 'node',
+      style: {
+        'label': 'data(label)',
+        'background-color': 'data(color)',
+        'text-valign': 'center',
+        'text-halign': 'center',
+        'shape': 'round-rectangle',
+        'width': 'label',
+        'padding': '10px',
+        'color': '#fff',
+        'font-size': '12px'
+      }
+    },
+    {
+      selector: 'edge',
+      style: {
+        'width': 2,
+        'line-color': '#888',
+        'target-arrow-shape': 'triangle',
+        'target-arrow-color': '#888',
+        'curve-style': 'bezier'
+      }
+    }
+  ]
+});
+
+// Add a node by type
+function addNode(type) {
+  const id = `n${idCounter++}`;
+  cy.add({
+    group: 'nodes',
+    data: {
+      id: id,
+      label: `${type.charAt(0).toUpperCase() + type.slice(1)} Node`,
+      color: colors[type] || '#666'
+    },
+    position: {
+      x: Math.random() * 500,
+      y: Math.random() * 500
+    }
+  });
+}
+
+// Enable connection mode
+cy.on('tap', 'node', function(evt) {
+  const node = evt.target;
+  if (!window.selectedNode) {
+    window.selectedNode = node;
+  } else {
+    cy.add({
+      group: 'edges',
+      data: {
+        source: window.selectedNode.id(),
+        target: node.id()
+      }
+    });
+    window.selectedNode = null;
+  }
+});
+
+// SAVE function
+function saveGraph() {
+  const graphData = cy.json().elements;
+  fetch('/api/save-pipeline', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: "My AI Pipeline",
+      graph: JSON.stringify(graphData)
+    })
+  })
+  .then(res => res.json())
+  .then(data => alert("Pipeline saved!"));
+}
+
+// LOAD on startup
+window.addEventListener('DOMContentLoaded', () => {
+  fetch('/api/load-pipeline')
+    .then(res => res.json())
+    .then(data => {
+      if (data.graph) {
+        const elements = JSON.parse(data.graph);
+        cy.add(elements);
+        cy.layout({ name: 'grid' }).run();
+      }
+    });
+});
+
+</script>
+{% endblock %}

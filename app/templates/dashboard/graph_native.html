@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">Cytoscape.js Native Graph</h2>
+
+<!-- Cytoscape Container -->
+<div id="cy" style="width: 100%; height: 600px; border: 1px solid #ccc;"></div>
+
+<!-- Cytoscape.js CDN -->
+<script src="https://unpkg.com/cytoscape@3.25.0/dist/cytoscape.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var cy = cytoscape({
+      container: document.getElementById('cy'),
+      elements: [
+        { data: { id: 'a' } },
+        { data: { id: 'b' } },
+        { data: { id: 'ab', source: 'a', target: 'b' } }
+      ],
+      layout: {
+        name: 'circle'
+      },
+      style: [
+        {
+          selector: 'node',
+          style: {
+            'background-color': '#007bff',
+            'label': 'data(id)',
+            'color': '#fff',
+            'text-valign': 'center',
+            'text-halign': 'center'
+          }
+        },
+        {
+          selector: 'edge',
+          style: {
+            'width': 2,
+            'line-color': '#999',
+            'target-arrow-color': '#999',
+            'target-arrow-shape': 'triangle'
+          }
+        }
+      ]
+    });
+  });
+</script>
+{% endblock %}

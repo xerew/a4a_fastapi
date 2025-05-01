@@ -54,3 +54,11 @@ async def create_analysis(
         "filters": []
     })
     return RedirectResponse(url="/analyses", status_code=303)
+
+@router.get("/graph-native", response_class=HTMLResponse)
+def graph_native_page(request: Request):
+    return templates.TemplateResponse("dashboard/graph_native.html", {"request": request})
+
+@router.get("/pipeline-builder", response_class=HTMLResponse)
+def pipeline_builder(request: Request):
+    return templates.TemplateResponse("pipeline/builder.html", {"request": request})
