@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Pipeline Builder with Fabric.js{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Interactive Code Pipeline Builder</h2>
+    <p>Drag and drop blocks onto the canvas to create a visual pipeline.</p>
+
+    <div class="row">
+        <!-- Available Code Blocks -->
+        <div class="col-md-4">
+            <h4>Code Blocks</h4>
+            <div class="code-blocks">
+                <div class="code-block" draggable="true" data-code="print('Hello, World!')" ondragstart="startDrag(event)">
+                    Print Statement
+                </div>
+                <div class="code-block" draggable="true" data-code="for i in range(10): print(i)" ondragstart="startDrag(event)">
+                    For Loop
+                </div>
+                <div class="code-block" draggable="true" data-code="if x > 0: print('Positive')" ondragstart="startDrag(event)">
+                    If Condition
+                </div>
+            </div>
+        </div>
+
+        <!-- Canvas for Drag-and-Drop -->
+        <div class="col-md-8">
+            <h4>Your Pipeline</h4>
+            <canvas id="pipelineCanvas" width="800" height="400" style="border:1px solid #ccc;"></canvas>
+        </div>
+    </div>
+
+    <!-- Save Pipeline Button -->
+    <form id="pipeline-form" method="post" action="{% url 'save_pipeline' %}">
+        {% csrf_token %}
+        <textarea id="pipeline-code" name="pipeline_code" style="display:none;"></textarea>
+        <button type="submit" class="btn btn-primary mt-3">Save Pipeline</button>
+    </form>
+</div>
+
+<style>
+    .code-blocks {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .code-block {
+        padding: 10px;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        cursor: grab;
+        text-align: center;
+    }
+</style>
+<script>
+    let canvas = new fabric.Canvas('pipelineCanvas');
+    let draggedCode = null;
+
+    // Handle drag start
+    function startDrag(event) {
+        draggedCode = event.target.getAttribute('data-code');
+    }
+
+    // Add a block to the canvas
+    function addBlockToCanvas(code, x, y) {
+        let block = new fabric.Text(code, {
+            left: x,
+            top: y,
+            fontSize: 14,
+            fill: 'black',
+            backgroundColor: '#f0f0f0',
+            padding: 10,
+            borderColor: '#ccc',
+            borderWidth: 1,
+            hasControls: false,
+        });
+
+        canvas.add(block);
+    }
+
+    // Handle drop event
+    canvas.on('mouse:down', function(event) {
+        if (draggedCode) {
+            const pointer = canvas.getPointer(event.e);
+            addBlockToCanvas(draggedCode, pointer.x, pointer.y);
+            draggedCode = null;
+        }
+    });
+
+    // Save the pipeline as text
+    function updatePipelineCode() {
+        let blocks = canvas.getObjects();
+        let pipelineCode = blocks.map(block => block.text).join('\n');
+        document.getElementById('pipeline-code').value = pipelineCode;
+    }
+
+    // Ensure the form submits with updated pipeline code
+    document.getElementById('pipeline-form').onsubmit = updatePipelineCode;
+</script>
+{% endblock content %}

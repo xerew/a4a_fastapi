@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock title %}
+
+{% block content %}
+<div class="container-fluid h-100" style="margin-top:10px;">
+    <div class="row h-100">
+        <!-- Query Input Section -->
+        <div class="col-md-6 border-end">
+            <h4>Query Input</h4>
+            <form>
+                <div class="mb-3">
+                    <textarea class="form-control" id="queryInput" rows="10" placeholder="Write your query here..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Run Query</button>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <div class="col-md-6">
+            <h4>Results</h4>
+            <div id="resultsDisplay">No results to display.</div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

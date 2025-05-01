@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include "components/header.html" %}
+</head>
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+    <!-- Main Wrapper -->
+    <div class="app-wrapper">
+        <!-- Navbar -->
+        {% include "components/navbar.html" %}
+        
+        <!-- Sidebar -->
+        {% include "components/sidebar.html" %}
+        
+        <!-- Main Content -->
+        <main class="app-main">
+            {% block content %}
+            <!-- Page-specific content goes here -->
+            {% endblock content %}
+        </main>
+        
+        <!-- Footer -->
+        {% include "components/footer.html" %}
+    </div>
+
+    {% block extra_js %}
+    <!-- Additional JavaScript for specific pages -->
+    {% endblock extra_js %}
+</body>
+</html>

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Create Analysis{% endblock title %}
+
+{% block content %}
+{% if messages %}
+<div class="alert alert-danger">
+    {% for message in messages %}
+        <p>{{ message }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+<div class="container mt-4">
+    <h4 class="mb-4">Create New Analysis</h4>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="mb-3">
+            <label for="analytics_type" class="form-label">Analytics Type</label>
+            <select class="form-control" id="analytics_type" name="analytics_type" required>
+                <option value="">-- Select Analytics Type --</option>
+                {% for type in analytics_types %}
+                <option value="{{ type }}">{{ type }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="analytics_goal" class="form-label">Analytics Goal</label>
+            <select class="form-control" id="analytics_goal" name="analytics_goal">
+                <option value="">-- Select Analytics Goal --</option>
+                {% for goal in analytics_goals %}
+                <option value="{{ goal }}">{{ goal }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="input_features" class="form-label">Input Features (Comma-separated)</label>
+            <input type="text" class="form-control" id="input_features" name="input_features">
+        </div>
+        <div class="mb-3">
+            <label for="preprocess_actions" class="form-label">Preprocess Actions</label>
+            <input type="text" class="form-control" id="preprocess_in_attr" name="preprocess_in_attr" placeholder="Input Attribute">
+            <input type="text" class="form-control" id="preprocess_out_attr" name="preprocess_out_attr" placeholder="Output Attribute">
+            <input type="text" class="form-control" id="preprocess_action" name="preprocess_action" placeholder="Action">
+        </div>
+        <div class="mb-3">
+            <label for="datasets" class="form-label">Datasets</label>
+            <input type="text" class="form-control" id="datasets" name="datasets" placeholder="Comma-separated">
+        </div>
+        <div class="mb-3">
+            <label for="model" class="form-label">Model</label>
+            <input type="text" class="form-control" id="model" name="model">
+        </div>
+        <div class="mb-3">
+            <label for="results_type_conf" class="form-label">Results Type Config</label>
+            <select class="form-control" id="results_type_conf" name="results_type_conf">
+                <option value="">-- Select Results Type --</option>
+                {% for result_type in result_types %}
+                <option value="{{ result_type }}">{{ result_type }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="filters" class="form-label">Filters</label>
+            <select class="form-control" id="filters" name="filters[]" multiple>
+                {% for filter in analytics_filters %}
+                <option value="{{ filter }}" {% if filter in selected_filters %}selected{% endif %}>
+                    {{ filter }}
+                </option>
+                {% endfor %}
+            </select>
+            <button type="button" class="btn btn-sm btn-secondary mt-2" id="clear-filters">Clear Filters</button>
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+</div>
+<script>
+    document.getElementById("clear-filters").addEventListener("click", function () {
+        const filterDropdown = document.getElementById("filters");
+        for (const option of filterDropdown.options) {
+            option.selected = false; // Deselect all options
+        }
+    });
+</script>
+{% endblock content %}

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}MongoDB Integration{% endblock title %}
+
+{% block content %}
+<div <div class="container-fluid mt-4" style="width: 100%;">
+    
+    <!-- Display Analyses Collection -->
+    <h4 class="mb-4">Analyses Collection</h4>
+    <form action="{% url 'create_analysis' %}" method="get" style="display:inline;">
+        <button type="submit" class="btn btn-sm btn-warning form-label">Create</button>
+    </form>
+    <table class="table table-striped" style="width: 100%;">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Analytics Type</th>
+                <th>Analytics Goal</th>
+                <th>Input Features</th>
+                <th>Preprocess Actions</th>
+                <th>Datasets</th>
+                <th>Model</th>
+                <th>Results Type Config</th>
+                <th>Filters</th>
+                <th>Date Created</th>
+                <th>Date Updated</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if analyses %}
+                {% for analysis in analyses %}
+                <tr>
+                    <td>{{ analysis.name }}</td>
+                    <td>{{ analysis.analytics_type }}</td>
+                    <td>{{ analysis.analytics_goal }}</td>
+                    <td>
+                        <ul>
+                            {% for feature in analysis.input_features %}
+                            <li>{{ feature }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            {% for action in analysis.preprocess_actions %}
+                            <li>{{ action.in_attr }} → {{ action.out_attr }} ({{ action.preprocess_action }})</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            {% for dataset in analysis.datasets %}
+                            <li>{{ dataset }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>{{ analysis.model }}</td>
+                    <td>
+                        <ul>
+                            {% for result_type in analysis.results_type_conf %}
+                            <li>{{ result_type }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            {% for filter in analysis.filters %}
+                            <li>{{ filter }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>{{ analysis.date_created|date:"Y-m-d H:i:s" }}</td>
+                    <td>{{ analysis.date_updated|date:"Y-m-d H:i:s" }}</td>
+                    <td>
+                        <form action="{% url 'edit_analysis' analysis.id %}" method="get" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-warning form-label">Edit</button>
+                        </form>
+                        <form action="{% url 'delete_analysis' analysis.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="12" class="text-center">No analyses available.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock content %}

@@ -1,0 +1,36 @@
+<nav class="app-header navbar navbar-expand bg-body">
+    <div class="container-fluid">
+        <!-- Start Navbar Links -->
+        <ul class="navbar-nav">
+            <li class="nav-item"><a class="nav-link" data-lte-toggle="sidebar" href="#" role="button"><i class="bi bi-list"></i></a></li>
+            <li class="nav-item d-none d-md-block"><a href="/dashboard'" class="nav-link">Home</a></li>
+            <li class="nav-item d-none d-md-block"><a href="#" class="nav-link">Contact</a></li>
+        </ul>
+        <!-- End Navbar Links -->
+
+        <!-- Right Navbar Links -->
+        <ul class="navbar-nav ms-auto">
+            <!-- User Profile Dropdown -->
+            {% if user %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i> {{ user.username }}
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+                        <div class="dropdown-header">
+                            <strong>{{ user.first_name }} {{ user.last_name }}</strong><br>
+                            <small>{{ user.email }}</small>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item">
+                            <i class="bi bi-person"></i> Profile
+                        </a>
+                        <a href="/logout" class="dropdown-item" id="logout-link">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </div>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
