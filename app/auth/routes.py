@@ -14,8 +14,19 @@ def login(request: Request, username: str = Form(...), password: str = Form(...)
     user = get_user_by_username(username)
     if user and verify_password(password, user.password):
         response = RedirectResponse(url="/dashboard", status_code=303)
-        response.set_cookie(key="user_id", value=str(user.id))
+
+        # ✅ Set persistent, secure cookie for 30 days
+        response.set_cookie(
+            key="user_id",
+            value=str(user.id),
+            max_age=30 * 24 * 60 * 60,  # 30 days in seconds
+            httponly=True,
+            samesite="lax",
+            secure=False  # Set to True in production with HTTPS
+        )
+
         return response
+
     return templates.TemplateResponse("account/login.html", {"request": request, "error": "Invalid credentials"})
 
 @router.get("/register", response_class=HTMLResponse)

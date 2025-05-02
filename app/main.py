@@ -9,7 +9,7 @@ from app.core.config import Base, engine
 from app.dash.graph import dash_app
 from starlette.middleware.wsgi import WSGIMiddleware
 from app.routes import api_pipeline
-from app.models.pipeline import Pipeline  # and any future models
+from app.models.pipeline import Pipeline
 
 app = FastAPI()
 

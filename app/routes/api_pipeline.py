@@ -3,8 +3,20 @@ from sqlalchemy.orm import Session
 from app.core.config import SessionLocal
 from app.models.pipeline import Pipeline
 from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
+from app.auth.dependencies import login_required
+from app.templates import templates
+
 
 router = APIRouter()
+
+@router.get("/pipeline-builder", response_class=HTMLResponse)
+def pipeline_builder(request: Request):
+    user = login_required(request)
+    if isinstance(user, RedirectResponse):
+        return user
+
+    return templates.TemplateResponse("pipeline/builder.html", {"request": request, "user": user})
 
 def get_db():
     db = SessionLocal()
