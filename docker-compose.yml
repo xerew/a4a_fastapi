@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: a4a_web
+    ports:
+      - "8085:8085"
+    volumes:
+      - .:/app
+    environment:
+      - MONGO_URI=mongodb://admin:adminpassword@host.docker.internal:27017/fiko?authSource=admin
+    networks:
+      - a4a_net
+
+networks:
+  a4a_net:
