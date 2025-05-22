@@ -10,6 +10,7 @@ from app.dash.graph import dash_app
 from starlette.middleware.wsgi import WSGIMiddleware
 from app.routes import api_pipeline
 from app.models.pipeline import Pipeline
+from fastapi.templating import Jinja2Templates
 
 app = FastAPI()
 
@@ -19,11 +20,14 @@ def startup_event():
     Base.metadata.create_all(bind=engine)
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
+templates = Jinja2Templates(directory="templates")
+templates.env.globals["url_for"] = app.url_path_for
 
 # Include routers
 app.include_router(auth_router)
 app.include_router(dashboard_router)
 app.include_router(api_pipeline.router)
+# app.include_router(analysis_crud.router)
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):

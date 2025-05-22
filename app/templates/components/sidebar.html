@@ -1,7 +1,7 @@
 <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
     <div class="sidebar-brand">
         <a href="/dashboard" class="brand-link">
-            <img src="static/assets/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image opacity-75 shadow">
+            <img src="{{ url_for('static', path='assets/img/AdminLTELogo.png') }}" alt="AdminLTE Logo" class="brand-image opacity-75 shadow">
             <span class="brand-text fw-light">A4A</span>
         </a>
     </div>
@@ -9,7 +9,7 @@
         <nav class="mt-2">
             <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
                 <li class="nav-item menu-open"><a href="/dashboard" class="nav-link active"><i class="nav-icon bi bi-speedometer"></i><p>Dashboard</p></a></li>
-                <li class="nav-item menu-open"><a href="/list_analyses" class="nav-link active"><i class="nav-icon bi bi-database-check"></i><p>MongoDB Integration</p></a></li>
+                <li class="nav-item menu-open"><a href="/list_collections" class="nav-link active"><i class="nav-icon bi bi-database-check"></i><p>MongoDB Integration</p></a></li>
                 <li class="nav-item menu-open"><a href="/pipeline-builder" class="nav-link active"><i class="nav-icon bi bi-columns-gap"></i><p>Pipeline Builder</p></a></li>
                 <li class="nav-item menu-open"><a href="/graph-native" class="nav-link active"><i class="nav-icon bi bi-bar-chart"></i><p>Graph Example</p></a></li>
                 <!-- Additional sidebar items here -->

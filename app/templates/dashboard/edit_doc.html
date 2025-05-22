@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Edit Document{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>Edit Document in <code>{{ collection_name }}</code></h3>
+
+    <form method="post" action="/collection/{{ collection_name }}/edit/{{ doc._id }}">
+        {% for key, value in doc.items() if key != "_id" %}
+        <div class="form-group">
+            <label for="{{ key }}">{{ key }}</label>
+            <input type="text" name="{{ key }}" id="{{ key }}" class="form-control"
+                value="{{ value }}">
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Update</button>
+        <a href="/collection/{{ collection_name }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock content %}

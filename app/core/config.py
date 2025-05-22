@@ -1,9 +1,14 @@
 # --- MongoDB ---
 from pymongo import MongoClient
+from motor.motor_asyncio import AsyncIOMotorClient
 
-MONGO_URL = "mongodb://localhost:27017"
-client = MongoClient(MONGO_URL)
-db = client["a4a"]
+MONGO_URI = "mongodb://admin:adminpassword@localhost:27017/fiko?authSource=admin"
+# client = MongoClient(MONGO_URL)
+client = AsyncIOMotorClient(MONGO_URI)
+db = client["fiko"]
+
+def get_db():
+    return db
 
 # --- PostgreSQL ---
 from sqlalchemy import create_engine

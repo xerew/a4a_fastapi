@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}MongoDB Collections{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>Collections</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Collection Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for name in collections %}
+            <tr>
+                <td>{{ name }}</td>
+                <td>
+                    <a href="/collection/{{ name }}" class="btn btn-primary btn-sm">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock content %}

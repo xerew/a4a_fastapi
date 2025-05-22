@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Create Document{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>Create Document in <code>{{ collection_name }}</code></h3>
+
+    <form method="post" action="/collection/{{ collection_name }}/create">
+        {% for field in fields %}
+        <div class="form-group">
+            <label>{{ field.name }}</label>
+            {% if field.type == "list" %}
+                <textarea name="{{ field.name }}" class="form-control" placeholder="Comma-separated values"></textarea>
+            {% elif field.type == "json" %}
+                <textarea name="{{ field.name }}" class="form-control" placeholder='JSON object or list'></textarea>
+            {% else %}
+                <input type="text" name="{{ field.name }}" class="form-control" />
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-success">Create</button>
+        <a href="/collection/{{ collection_name }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock content %}
