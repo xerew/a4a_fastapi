@@ -10,6 +10,7 @@ services:
       - .:/app
     environment:
       - MONGO_URI=mongodb://admin:adminpassword@host.docker.internal:27017/fiko?authSource=admin
+      - POSTGRES_URL=postgresql+psycopg2://postgres:root@host.docker.internal:5432/a4a_fastapi
     networks:
       - a4a_net
 
