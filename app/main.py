@@ -20,7 +20,7 @@ def startup_event():
     Base.metadata.create_all(bind=engine)
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="app/templates")
 templates.env.globals["url_for"] = app.url_path_for
 
 # Include routers

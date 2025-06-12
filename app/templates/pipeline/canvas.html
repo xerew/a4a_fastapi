@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">Interactive Pipeline Builder</h2>
+
+<!-- Toolbar -->
+<div class="mb-2">
+  <button id="connect-toggle" class="btn btn-outline-primary">
+    🔗 Enable Connect Mode
+  </button>
+</div>
+
+<!-- Layout: Sidebar + Canvas -->
+<div style="display: flex; gap: 16px;">
+  <!-- Sidebar -->
+  <div id="sidebar" style="width: 250px; border: 1px solid #ccc; padding: 10px; max-height: 600px; overflow-y: auto;">
+    <h5>Available Items</h5>
+    <div id="collection-list"></div>
+  </div>
+
+  <!-- Cytoscape Canvas -->
+  <div id="cy" style="flex: 1; height: 600px; border: 2px solid #999;"></div>
+</div>
+
+<!-- JS Dependencies -->
+<script src="https://unpkg.com/cytoscape@3.25.0/dist/cytoscape.min.js"></script>
+
+<script>
+  let cy;
+  let connectMode = false;
+  let sourceNode = null;
+
+  const collectionShapes = {
+    analysis: "round-rectangle",
+    dataset: "ellipse",
+    model: "hexagon",
+    deployment: "diamond",
+    deployment_conf: "triangle",
+    project: "octagon",
+    results: "pentagon"
+  };
+
+  const shapeColors = {
+    analysis: "#4e79a7",
+    dataset: "#59a14f",
+    model: "#f28e2b",
+    deployment: "#e15759",
+    deployment_conf: "#b07aa1",
+    project: "#9c755f",
+    results: "#bab0ac"
+  };
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    // Fetch all documents from collections
+    const response = await fetch("/api/collection-objects");
+    const docMap = await response.json();
+
+    // Populate sidebar
+    const listContainer = document.getElementById("collection-list");
+    for (const [collection, docs] of Object.entries(docMap)) {
+      const header = document.createElement("h6");
+      header.textContent = collection.toUpperCase();
+      header.style.marginTop = "10px";
+      header.style.fontWeight = "bold";
+      listContainer.appendChild(header);
+
+      for (const doc of docs) {
+        const div = document.createElement("div");
+        div.className = "draggable";
+        div.textContent = doc.label;
+        div.setAttribute("draggable", true);
+        div.dataset.collection = collection;
+        div.dataset.id = doc._id;
+        div.dataset.label = doc.label;
+
+        Object.assign(div.style, {
+          padding: "6px",
+          margin: "3px 0",
+          background: shapeColors[collection] || "#666",
+          color: "#fff",
+          cursor: "grab",
+          borderRadius: "5px",
+          fontSize: "0.9em"
+        });
+
+        listContainer.appendChild(div);
+      }
+    }
+
+    // Enable drag behavior
+    document.querySelectorAll(".draggable").forEach(el => {
+      el.addEventListener("dragstart", e => {
+        e.dataTransfer.setData("text/collection", el.dataset.collection);
+        e.dataTransfer.setData("text/id", el.dataset.id);
+        e.dataTransfer.setData("text/label", el.dataset.label);
+      });
+    });
+
+    // Init Cytoscape
+    cy = cytoscape({
+      container: document.getElementById("cy"),
+      elements: [],
+      layout: { name: "preset" },
+      style: [
+        {
+          selector: "node",
+          style: {
+            "label": "data(label)",
+            "text-valign": "center",
+            "text-halign": "center",
+            "color": "#fff",
+            "background-color": "#666",
+            "shape": "ellipse",
+            "width": 100,
+            "height": 50,
+            "border-width": 0
+          }
+        },
+        {
+          selector: "edge",
+          style: {
+            "width": 2,
+            "label": "data(label)",
+            "line-color": "#aaa",
+            "target-arrow-color": "#aaa",
+            "target-arrow-shape": "triangle",
+            "curve-style": "bezier",
+            "font-size": 10
+          }
+        }
+      ]
+    });
+
+    // Handle drop from sidebar into canvas
+    const cyCanvas = document.getElementById("cy");
+
+    cyCanvas.addEventListener("dragover", e => e.preventDefault());
+
+    cyCanvas.addEventListener("drop", e => {
+      e.preventDefault();
+      const collection = e.dataTransfer.getData("text/collection");
+      const docId = e.dataTransfer.getData("text/id");
+      const label = e.dataTransfer.getData("text/label");
+
+      const rect = cyCanvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const nodeId = `${collection}-${docId}`;
+
+      if (cy.getElementById(nodeId).length) return; // avoid duplicates
+
+      cy.add({
+        group: "nodes",
+        data: { id: nodeId, label: label, collection, mongo_id: docId },
+        position: { x, y },
+        classes: collection
+      });
+
+      cy.style()
+        .selector(`node.${collection}`)
+        .style({
+          "shape": collectionShapes[collection] || "ellipse",
+          "background-color": shapeColors[collection] || "#666",
+          "text-outline-color": shapeColors[collection] || "#666"
+        }).update();
+    });
+
+    // Connect Mode Toggle
+    const connectBtn = document.getElementById("connect-toggle");
+    connectBtn.addEventListener("click", () => {
+      connectMode = !connectMode;
+      sourceNode = null;
+      connectBtn.classList.toggle("btn-primary", connectMode);
+      connectBtn.classList.toggle("btn-outline-primary", !connectMode);
+      connectBtn.textContent = connectMode ? "✅ Connecting: Click Two Nodes" : "🔗 Enable Connect Mode";
+    });
+
+    // Handle connect clicks
+    cy.on("tap", "node", evt => {
+      if (!connectMode) return;
+
+      const tapped = evt.target;
+      if (!sourceNode) {
+        sourceNode = tapped;
+        tapped.style("border-width", 3);
+        tapped.style("border-color", "#ff0");
+      } else if (sourceNode !== tapped) {
+        cy.add({
+          group: "edges",
+          data: {
+            id: `edge-${Date.now()}`,
+            source: sourceNode.id(),
+            target: tapped.id(),
+            label: "custom"
+          }
+        });
+
+        sourceNode.style("border-width", 0);
+        sourceNode = null;
+      }
+    });
+
+    // Right-click deletion
+    document.getElementById("cy").addEventListener("contextmenu", e => e.preventDefault());
+
+    cy.on("cxttap", evt => {
+      const target = evt.target;
+      if (target.group() === "nodes" || target.group() === "edges") {
+        if (confirm(`Delete ${target.group()} "${target.data("label") || target.id()}"?`)) {
+          cy.remove(target);
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, Form, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from app.models.analysis import Analysis
 from app.templates import templates
 from app.auth.dependencies import login_required
@@ -10,6 +10,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from bson import ObjectId
 import json
 from app.schemas.collection_schemas import collection_field_definitions
+
 
 
 templates = Jinja2Templates(directory="app/templates")
@@ -153,3 +154,43 @@ async def create_doc_submit(name: str, request: Request, db=Depends(get_db)):
 async def delete_doc(name: str, doc_id: str, db=Depends(get_db)):
     await db[name].delete_one({"_id": ObjectId(doc_id)})
     return RedirectResponse(url=f"/collection/{name}", status_code=303)
+
+@router.get("/pipeline/ui", response_class=HTMLResponse)
+async def pipeline_ui(request: Request):
+    user = login_required(request)
+    if isinstance(user, HTMLResponse):
+        return user
+    return templates.TemplateResponse("pipeline/canvas.html", {"request": request})
+
+@router.get("/api/collections-schema")
+async def get_collection_schema():
+    return JSONResponse(collection_field_definitions)
+
+@router.get("/api/collection-objects")
+async def get_collection_objects(db=Depends(get_db)):
+    from bson import ObjectId
+
+    # Collections and their label field (fallback to _id)
+    targets = {
+        "analysis": "name",
+        "dataset": "name",
+        "model": "name",
+        "deployment": "name",
+        "deployment_conf": "name",
+        "project": "name",
+        "results": "name",
+    }
+
+    result = {}
+
+    for col, label in targets.items():
+        cursor = db[col].find()
+        result[col] = [
+            {
+                "_id": str(doc["_id"]),
+                "label": doc.get(label, f"{col}-{str(doc['_id'])[:6]}")
+            }
+            async for doc in cursor
+        ]
+
+    return JSONResponse(result)
